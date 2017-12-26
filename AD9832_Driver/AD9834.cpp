@@ -27,103 +27,98 @@ extern "C" {
 #include "AD9834.h"
 #include <SPI.h>
 
-unsigned int AD9834_CONTROL = 0x0000;
 
-int FSYNC_PIN = 11;
-int PSEL_PIN = 3;
-int FSEL_PIN = 2;
 
-int PINSW = 0;
-int FREG = 0;
 
-void AD9834_Use_Pins(int value) {
+//Master swtiches for pin vs software control of phase, freq, reset, and sleep functions
+void AD9834::Use_Pins(int value) {
 	if (value) {
-		AD9834_CONTROL |= 0x0100;
+		CONTROL |= 0x0100;
 		PINSW = 1;
 	}
 	else {
-		AD9834_CONTROL &= ~0x0100;
+		CONTROL &= ~0x0100;
 		PINSW = 0;
 	}
-	AD9834_SendWord(AD9834_CONTROL);
+	SendWord(CONTROL);
 }
 
-void AD9834_Sign_Bit_On(int value) {
+void AD9834::Sign_Bit_On(int value) {
 	if (value) {
-		AD9834_CONTROL |= 0x0028;
+		CONTROL |= 0x0028;
 	}
 	else {
-		AD9834_CONTROL &= ~0x0028;
+		CONTROL &= ~0x0028;
 	}
-	AD9834_SendWord(AD9834_CONTROL);
+	SendWord(CONTROL);
 }
 
-void AD9834_DAC_ON(int value) {
+void AD9834::DAC_ON(int value) {
 	if (value) {
-		AD9834_CONTROL &= ~0x0040; // Clear the SLEEP12 bit.
+		CONTROL &= ~0x0040; // Clear the SLEEP12 bit.
 	}
 	else {
-		AD9834_CONTROL |= 0x0040; // Set the SLEEP12 bit.
+		CONTROL |= 0x0040; // Set the SLEEP12 bit.
 	}
-	AD9834_SendWord(AD9834_CONTROL);
+	SendWord(CONTROL);
 }
 
-void AD9834_SelectFREG(int value) {
+void AD9834::SelectFREG(int value) {
 	if (PINSW) {
-		if (value)   digitalWrite(FSEL_PIN, HIGH);
-		else        digitalWrite(FSEL_PIN, LOW);
+		if (value)   digitalWrite(FreqSelPin, HIGH);
+		else        digitalWrite(FreqSelPin, LOW);
 	}
 	else {
-		if (value)   AD9834_CONTROL |= 0x0800;
-		else        AD9834_CONTROL &= ~0x0800;
-		AD9834_SendWord(AD9834_CONTROL);
+		if (value)   CONTROL |= 0x0800;
+		else        CONTROL &= ~0x0800;
+		SendWord(CONTROL);
 	}
 }
 
-void AD9834_SelectPREG(int value) {
+void AD9834::SelectPREG(int value) {
 	if (PINSW) {
-		if (value)   digitalWrite(PSEL_PIN, HIGH);
-		else        digitalWrite(PSEL_PIN, LOW);
+		if (value)   digitalWrite(PhaseSelPin, HIGH);
+		else        digitalWrite(PhaseSelPin, LOW);
 	}
 	else {
-		if (value)   AD9834_CONTROL |= 0x0400;
-		else        AD9834_CONTROL &= ~0x0400;
-		AD9834_SendWord(AD9834_CONTROL);
+		if (value)   CONTROL |= 0x0400;
+		else        CONTROL &= ~0x0400;
+		SendWord(CONTROL);
 	}
 }
 
-void AD9834_Reset(int value) {
+void AD9834::Reset(int value) {
 	if (PINSW) {
-		if (value)   digitalWrite(RESET_PIN, HIGH);
-		else        digitalWrite(RESET_PIN, LOW);
+		if (value)   digitalWrite(ResetPin, HIGH);
+		else        digitalWrite(ResetPin, LOW);
 	}
 	else {
-		if (value)   AD9834_CONTROL |= 0x0100;
-		else        AD9834_CONTROL &= ~0x0100;
-		AD9834_SendWord(AD9834_CONTROL);
+		if (value)   CONTROL |= 0x0100;
+		else        CONTROL &= ~0x0100;
+		SendWord(CONTROL);
 	}
 }
 
-void AD9834_Sleep(int value) {
+void AD9834::Sleep(int value) {
 	if (PINSW) {
-		if (value)   digitalWrite(SLEEP_PIN, HIGH);
-		else        digitalWrite(SLEEP_PIN, LOW);
+		if (value)   digitalWrite(SleepPin, HIGH);
+		else        digitalWrite(SleepPin, LOW);
 	}
 	else {
-		if (value)   AD9834_CONTROL |= 0x0080;
-		else        AD9834_CONTROL &= ~0x0080;
-		AD9834_SendWord(AD9834_CONTROL);
+		if (value)   CONTROL |= 0x0080;
+		else        CONTROL &= ~0x0080;
+		SendWord(CONTROL);
 	}
 }
 
-void AD9834_Triangle_Output(int value) {
-	if (value)   AD9834_CONTROL |= 0x0002;
-	else        AD9834_CONTROL &= ~0x0002;
-	AD9834_SendWord(AD9834_CONTROL);
+void AD9834::Triangle_Output(int value) {
+	if (value)   CONTROL |= 0x0002;
+	else        CONTROL &= ~0x0002;
+	SendWord(CONTROL);
 }
 
 // Sets FREG0 to the value required to produce a specified frequency, in Hz.
-unsigned long AD9834_SetFreq(int f_reg, unsigned long freq) {
+unsigned long AD9834::SetFreq(int f_reg, unsigned long freq) {
 	unsigned int data;
 	unsigned long temp;
 	unsigned int f_LSB;
@@ -137,16 +132,16 @@ unsigned long AD9834_SetFreq(int f_reg, unsigned long freq) {
 		f_LSB = (0x4000 | (unsigned int)(temp & 0x00003FFF));
 		f_MSB = (0x4000 | ((unsigned int)(temp >> 14) & 0x3FFF));
 	}
-	AD9834_SendWord(AD9834_CONTROL | 0x2000);
-	AD9834_SendWord(f_LSB);
-	AD9834_SendWord(f_MSB);
-	AD9834_SendWord(AD9834_CONTROL);
+	SendWord(CONTROL | 0x2000);
+	SendWord(f_LSB);
+	SendWord(f_MSB);
+	SendWord(CONTROL);
 	return temp;
 }
 
 // Sets FREG0 to the value required to produce a specified frequency, in Hz.
 // Also set an offset in units of 0.18626448439197 Hz
-unsigned long AD9834_SetFreq(int f_reg, unsigned long freq, unsigned long offset) {
+unsigned long AD9834::SetFreq(int f_reg, unsigned long freq, unsigned long offset) {
 	unsigned int data;
 	unsigned long temp;
 	unsigned int f_LSB;
@@ -161,44 +156,71 @@ unsigned long AD9834_SetFreq(int f_reg, unsigned long freq, unsigned long offset
 		f_LSB = (0x4000 | (unsigned int)(temp & 0x00003FFF));
 		f_MSB = (0x4000 | ((unsigned int)(temp >> 14) & 0x3FFF));
 	}
-	AD9834_SendWord(AD9834_CONTROL | 0x2000);
-	AD9834_SendWord(f_LSB);
-	AD9834_SendWord(f_MSB);
-	AD9834_SendWord(AD9834_CONTROL);
+	SendWord(CONTROL | 0x2000);
+	SendWord(f_LSB);
+	SendWord(f_MSB);
+	SendWord(CONTROL);
 	return temp;
 }
 
-// Initialises the AD9834, clearing all the registers, and putting it into sleep mode.
-void AD9834_Setup(int fsync, int psel, int fsel) {
-	FSYNC_PIN = fsync;
-	PSEL_PIN = psel;
-	FSEL_PIN = fsel;
-	pinMode(FSYNC_PIN, OUTPUT);
-	pinMode(PSEL_PIN, OUTPUT);
-	pinMode(FSEL_PIN, OUTPUT);
 
-	digitalWrite(FSYNC_PIN, HIGH); // Set FSYNC high - this goes low when writing to the registers.
-	digitalWrite(PSEL_PIN, LOW);
-	digitalWrite(FSEL_PIN, LOW); // Use FREG0 by default.
+/* Initialises the AD9834, clearing all the registers, and putting it into sleep mode. 
+	Leaving pins set to -1 forces system to use SPI version of the function (i.e. 
+	use RESET command rather than RESET pin)*/
+void AD9834::Setup(int cspin, 
+	int phaseselpint=-1, 
+	int fselpin=-1,
+	int resetpin=-1,
+	int sleeppin=-1) {
 
-	SPI.begin();
-	SPI.setBitOrder(MSBFIRST);
-	SPI.setDataMode(SPI_MODE2);
-	SPI.setClockDivider(SPI_CLOCK_DIV2);
+	CSPin = cspin;
+	pinMode(CSPin, OUTPUT);
+	digitalWrite(CSPin, HIGH); // Set FSYNC high - this goes low when writing to the registers.
 
+
+	FreqSelPin = fselpin;
+	if (FreqSelPin != -1)
+	{
+		pinMode(FreqSelPin, OUTPUT);
+		digitalWrite(FreqSelPin, LOW); // Use FREG0 by default.
+	}
+	
+	PhaseSelPin = phaseselpint;
+	if (PhaseSelPin != -1)
+	{
+		pinMode(PhaseSelPin, OUTPUT);
+		digitalWrite(PhaseSelPin, LOW); // Use FREG0 by default.
+	}
+
+	ResetPin = resetpin;
+	if (ResetPin != -1)
+	{
+		pinMode(ResetPin, OUTPUT);
+		digitalWrite(ResetPin, LOW); // Use FREG0 by default.
+	}
+
+	SleepPin = sleeppin;
+	if (SleepPin != -1)
+	{
+		pinMode(SleepPin, OUTPUT);
+		digitalWrite(SleepPin, LOW); // Use FREG0 by default.
+	}
+
+
+	SPI.beginTransaction(settings);
 	// Set everything to off, basically.
-	AD9834_SendWord(AD9834_CONTROL);
+	SendWord(CONTROL);
 
 	// Null the phase Registers.
-	AD9834_SendWord(0xC000); // Phase register 0
-	AD9834_SendWord(0xE000); // Phase register 1
+	SendWord(0xC000); // Phase register 0
+	SendWord(0xE000); // Phase register 1
 
 }
 
-void AD9834_SINE_ON() {
-	AD9834_Sleep(0);
-	AD9834_DAC_ON(1);
-	AD9834_Reset(0);
+void AD9834::SINE_ON() {
+	Sleep(0);
+	DAC_ON(1);
+	Reset(0);
 }
 
 
@@ -206,7 +228,7 @@ void AD9834_SINE_ON() {
 // WARNING: I am using direct register writes in this function, and hence
 // the FSEL pin is hardcoded to Port B pin 7. 
 // To use this on any other PCB, this function will have to be modified.
-void AD9834_SendWord(unsigned int data) {
+void AD9834::SendWord(unsigned int data) {
 	PORTB &= ~_BV(7);
 	SPI.transfer((data >> 8) & 0xFF);
 	SPI.transfer(data & 0xFF);
@@ -214,7 +236,7 @@ void AD9834_SendWord(unsigned int data) {
 }
 
 // Set the phase of a register, in degrees (0-359). 
-void AD9834_SetPREG(unsigned int preg, unsigned int phase) {
+void AD9834::SetPREG(unsigned int preg, unsigned int phase) {
 	// check for an invalid phase.
 	if (phase<0 || phase>359) {
 		return;
@@ -223,10 +245,10 @@ void AD9834_SetPREG(unsigned int preg, unsigned int phase) {
 	unsigned int phaseval = 0x0FFF * ((float)phase / 360.0);
 
 	if (preg == 0) {
-		AD9834_SendWord((0x0FFF & phaseval) + 0xC000);
+		SendWord((0x0FFF & phaseval) + 0xC000);
 	}
 	else {
-		AD9834_SendWord((0x0FFF & phaseval) + 0xE000);
+		SendWord((0x0FFF & phaseval) + 0xE000);
 	}
 }
 
