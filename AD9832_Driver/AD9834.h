@@ -1,7 +1,7 @@
 /*
 AD9834.cpp - AD9834 Direct Digital Synthesis IC Library
 
-Copyright (C) 2012 Mark Jessop <mark.jessop@adelaide.edu.au>
+
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
@@ -54,43 +54,59 @@ public:
 
 	typedef enum {
 		SINUSOIDAL_WAVEFORM,
-		TRIANGULAR_WAVEFORM
+		TRIANGULAR_WAVEFORM,
+		SQUARE_WAVEFORM
 	} Waveform;
+
+	enum FreqReg {
+		FREQ1 = 1,
+		FREQ0 =0
+	};
+
+	enum PhaseReg {
+		PAHSE1 = 1,
+		PHASE0 = 0
+	};
 
 	// Function Definitions
 	void SendWord(unsigned int data);
 	void Use_Pins(int value);
 	void Sign_Bit_On(int value);
 	void DAC_ON(int value);
-	void SelectFREG(int value);
-	void SelectPREG(int value);
-	void Reset(int value);
-	void Sleep(int value);
-	void Triangle_Output(int value);
-	unsigned long SetFreq(int f_reg, unsigned long freq);
-	unsigned long SetFreq(int f_reg, unsigned long freq, unsigned long offset);
-	
-	
-	void Setup(int cspin,
+	void SelectFREG(FreqReg value);
+	void SelectPREG(PhaseReg value);
+	void Reset(bool value);
+	void Sleep(bool value);
+
+	unsigned long SetFreq(FreqReg f_reg, float freq);
+	unsigned long SetFreq(FreqReg f_reg, float freq, uint16_t offset);
+	void Mode(Waveform value);
+	AD9834(float master_freq,int cspin,
 		int phaseselpint = -1,
 		int fselpin = -1,
 		int resetpin = -1,
 		int sleeppin = -1);
-	void SINE_ON();
-	void SetPREG(unsigned int preg, unsigned int phase);
+
+	void SetPREG(PhaseReg preg, unsigned int phase);
 
 private:
-	unsigned int CSPin = 11;
-	unsigned int FreqSelPin = -1;
-	unsigned int PhaseSelPin = -1;
-	unsigned int ResetPin = -1;
-	unsigned int SleepPin = -1;
+	 int CSPin = 11;
+	 int FreqSelPin = -1;
+	 int PhaseSelPin = -1;
+	 int ResetPin = -1;
+	 int SleepPin = -1;
+
+	 float MasterClkFreq;
+	 float MasterClkFreqStep;
 
 	unsigned int CONTROL = 0x0000;
 	int Pinswitch = 0;
 	int FREG = 0;
 
 	const SPISettings settings= SPISettings(16000000, LSBFIRST, SPI_MODE2);
+
+	void SINE_ON();
+	void Triangle_Output(int value);
 };
 
 
