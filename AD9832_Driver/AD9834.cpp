@@ -32,21 +32,32 @@ extern "C" {
 void AD9834::Use_Pins(int value) {
 	if (value) {
 		CONTROL |= PIN_SW;
-		Pinswitch = 1;
+		PinSwitch = 1;
 	}
 	else {
 		CONTROL &= ~PIN_SW;
-		Pinswitch = 0;
+		PinSwitch = 0;
 	}
 	SendWord(CONTROL);
 }
 
-void AD9834::Sign_Bit_On(int value) {
+void AD9834::Sign_Bit_On(bool value) {
 	if (value) {
-		CONTROL |= 0x0028;
+		CONTROL |= OPBITEN;
 	}
 	else {
-		CONTROL &= ~0x0028;
+		CONTROL &= ~OPBITEN;
+	}
+	SendWord(CONTROL);
+}
+
+void AD9834::Comparator_On(bool value)
+{
+	if (value) {
+		CONTROL |= SIGN_PIB;
+	}
+	else {
+		CONTROL &= ~SIGN_PIB;
 	}
 	SendWord(CONTROL);
 }
@@ -62,7 +73,7 @@ void AD9834::DAC_ON(int value) {
 }
 
 void AD9834::SelectFREG(FreqReg value) {
-	if (Pinswitch&(FreqSelPin!=-1)) {
+	if (PinSwitch&(FreqSelPin!=-1)) {
 		if (value)   digitalWrite(FreqSelPin, HIGH);
 		else        digitalWrite(FreqSelPin, LOW);
 	}
@@ -74,7 +85,7 @@ void AD9834::SelectFREG(FreqReg value) {
 }
 
 void AD9834::SelectPREG(PhaseReg value) {
-	if (Pinswitch&(PhaseSelPin!=-1)) {
+	if (PinSwitch&(PhaseSelPin!=-1)) {
 		if (value)   digitalWrite(PhaseSelPin, HIGH);
 		else        digitalWrite(PhaseSelPin, LOW);
 	}
@@ -86,7 +97,7 @@ void AD9834::SelectPREG(PhaseReg value) {
 }
 
 void AD9834::Reset(bool value) {
-	if (Pinswitch&(ResetPin != -1)) {
+	if (PinSwitch&(ResetPin != -1)) {
 		if (value)   digitalWrite(ResetPin, HIGH);
 		else        digitalWrite(ResetPin, LOW);
 	}
@@ -98,7 +109,7 @@ void AD9834::Reset(bool value) {
 }
 
 void AD9834::Sleep(bool value) {
-	if (Pinswitch&(SleepPin != -1)) {
+	if (PinSwitch&(SleepPin != -1)) {
 		if (value)   digitalWrite(SleepPin, HIGH);
 		else        digitalWrite(SleepPin, LOW);
 	}
@@ -110,54 +121,37 @@ void AD9834::Sleep(bool value) {
 }
 //todo come back to this
 void AD9834::Triangle_Output(int value) {
-	if (value)   CONTROL |= MODE;
-	else        CONTROL &= ~MODE;
-	SendWord(CONTROL);
+
+}
+
+
+void AD9834::WaveOutput_ON() {
+	Sleep(0);
+	DAC_ON(1);
+	Reset(0);
 }
 
 // Sets FREG0 to the value required to produce a specified frequency, in Hz.
-unsigned long AD9834::SetFreq(FreqReg f_reg, float freq) {
+unsigned long AD9834::SetFreq(FreqReg f_reg, float freq, uint16_t offset=0) {
 	unsigned int data;
-	uint32_t temp;
+
 	uint16_t f_LSB;
 	uint16_t  f_MSB;
-	temp = ((uint32_t)(freq/MasterClkFreqStep)) & 0x0FFFFFFF;//7 F's for 28 bits
+	FreqRegVal = ((uint32_t)(freq / MasterClkFreqStep)) & 0x0FFFFFFF;//7 F's for 28 bits
+	FreqRegVal += offset;
 	if (f_reg == 1) {
-		f_LSB = (FREQ1_ADDR | (uint16_t)(temp & 0x00003FFF));
-		f_MSB = (FREQ1_ADDR | (uint16_t)((temp >> 14) & 0x3FFF));
+		f_LSB = (FREQ1_ADDR | (uint16_t)(FreqRegVal & 0x00003FFF));
+		f_MSB = (FREQ1_ADDR | (uint16_t)((FreqRegVal >> 14) & 0x3FFF));
 	}
 	else {
-		f_LSB = (FREQ0_ADDR | (uint16_t)(temp & 0x00003FFF));
-		f_MSB = (FREQ0_ADDR | ((uint16_t)(temp >> 14) & 0x3FFF));
+		f_LSB = (FREQ0_ADDR | (uint16_t)(FreqRegVal & 0x00003FFF));
+		f_MSB = (FREQ0_ADDR | ((uint16_t)(FreqRegVal >> 14) & 0x3FFF));
 	}
 	SendWord(CONTROL | B28);
 	SendWord(f_LSB);
 	SendWord(f_MSB);
 	SendWord(CONTROL);//todo drop this but check other usage first
-	return temp;
-}
-
-// Sets FREG0 to the value required to produce a specified frequency, in Hz.
-unsigned long AD9834::SetFreq(FreqReg f_reg, float freq, uint16_t offset) {
-	unsigned int data;
-	uint32_t temp;
-	uint16_t f_LSB;
-	uint16_t  f_MSB;
-	temp = ((uint32_t)(freq / MasterClkFreqStep)) & 0x0FFFFFFF;//7 F's for 28 bits
-	temp += offset;
-	if (f_reg == 1) {
-		f_LSB = (FREQ1_ADDR | (uint16_t)(temp & 0x00003FFF));
-		f_MSB = (FREQ1_ADDR | (uint16_t)((temp >> 14) & 0x3FFF));
-	}
-	else {
-		f_LSB = (FREQ0_ADDR | (uint16_t)(temp & 0x00003FFF));
-		f_MSB = (FREQ0_ADDR | ((uint16_t)(temp >> 14) & 0x3FFF));
-	}
-	SendWord(CONTROL | B28);
-	SendWord(f_LSB);
-	SendWord(f_MSB);
-	SendWord(CONTROL);//todo drop this but check other usage first
-	return temp;
+	return FreqRegVal;
 }
 
 //Sets the waveform 
@@ -166,15 +160,16 @@ void AD9834::Mode(Waveform value)
 	switch (value)
 	{
 	case (Waveform::SINUSOIDAL_WAVEFORM):
-		SINE_ON();
+		CONTROL |= MODE;
 		break;
 
 	case (Waveform::TRIANGULAR_WAVEFORM):
-		Triangle_Output(1);
+		CONTROL &= ~MODE;
 		break;
 	default:
 		break;
 	}
+	SendWord(CONTROL);
 }
 
 
@@ -236,18 +231,13 @@ AD9834::AD9834(float master_freq, int cspin,
 
 }
 
-void AD9834::SINE_ON() {
-	Sleep(0);
-	DAC_ON(1);
-	Reset(0);
-}
 
 
 // Send a 16-bit data word to the AD9834, MSB first.
 // WARNING: I am using direct register writes in this function, and hence
 // the FSEL pin is hardcoded to Port B pin 7. 
 // To use this on any other PCB, this function will have to be modified.
-void AD9834::SendWord(unsigned int data) {
+void AD9834::SendWord(uint16_t data) {
 	PORTB &= ~_BV(7);
 	SPI.transfer((data >> 8) & 0xFF);
 	SPI.transfer(data & 0xFF);
@@ -255,21 +245,26 @@ void AD9834::SendWord(unsigned int data) {
 }
 
 // Set the phase of a register, in degrees (0-359). 
-void AD9834::SetPREG(PhaseReg preg, unsigned int phase) {
+void AD9834::SetPhase(PhaseReg preg, unsigned int phase) {
 	// check for an invalid phase.
 	if (phase<0 || phase>359) {
 		return;
 	}
 
-	unsigned int phaseval = 0x0FFF * ((float)phase / 360.0);
+	unsigned int PhaseRegVal = 0x0FFF * ((float)phase / 360.0);//phase is 12 bits
+
 
 	if (preg == 0) {
-		SendWord((0x0FFF & phaseval) + 0xC000);
+		SendWord((0x0FFF & PhaseRegVal) + 0xC000);
 	}
 	else {
-		SendWord((0x0FFF & phaseval) + 0xE000);
+		SendWord((0x0FFF & PhaseRegVal) + 0xE000);
 	}
 }
 
+unsigned int AD9834::GetPhase()
+{
+
+}
 
 

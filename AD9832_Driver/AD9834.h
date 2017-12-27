@@ -60,7 +60,7 @@ public:
 
 	enum FreqReg {
 		FREQ1 = 1,
-		FREQ0 =0
+		FREQ0 = 0
 	};
 
 	enum PhaseReg {
@@ -69,9 +69,9 @@ public:
 	};
 
 	// Function Definitions
-	void SendWord(unsigned int data);
 	void Use_Pins(int value);
-	void Sign_Bit_On(int value);
+	void Sign_Bit_On(bool value);
+	void Comparator_On(bool value);
 	void DAC_ON(int value);
 	void SelectFREG(FreqReg value);
 	void SelectPREG(PhaseReg value);
@@ -81,32 +81,39 @@ public:
 	unsigned long SetFreq(FreqReg f_reg, float freq);
 	unsigned long SetFreq(FreqReg f_reg, float freq, uint16_t offset);
 	void Mode(Waveform value);
-	AD9834(float master_freq,int cspin,
+	AD9834(float master_freq, int cspin,
 		int phaseselpint = -1,
 		int fselpin = -1,
 		int resetpin = -1,
 		int sleeppin = -1);
 
-	void SetPREG(PhaseReg preg, unsigned int phase);
+	void SetPhase(PhaseReg preg, unsigned int phase);
+	unsigned int GetPhase();
 
 private:
-	 int CSPin = 11;
-	 int FreqSelPin = -1;
-	 int PhaseSelPin = -1;
-	 int ResetPin = -1;
-	 int SleepPin = -1;
+	int CSPin = 11;
+	int FreqSelPin = -1;
+	int PhaseSelPin = -1;
+	int ResetPin = -1;
+	int SleepPin = -1;
 
-	 float MasterClkFreq;
-	 float MasterClkFreqStep;
+	float MasterClkFreq;
+	float MasterClkFreqStep;
 
-	unsigned int CONTROL = 0x0000;
-	int Pinswitch = 0;
-	int FREG = 0;
+	//holds the current control word 
+	uint16_t CONTROL = 0x0000;
+	//master switch for pin vs. software control
+	int PinSwitch = 0;
 
-	const SPISettings settings= SPISettings(16000000, LSBFIRST, SPI_MODE2);
+	//Current freq and phase values
+	uint32_t FreqRegVal = 0;
+	uint16_t PhaseRegVal = 0;
 
-	void SINE_ON();
+	const SPISettings settings = SPISettings(16000000, LSBFIRST, SPI_MODE2);
+
+	void WaveOutput_ON();
 	void Triangle_Output(int value);
+	void SendWord(uint16_t data);
 };
 
 
