@@ -154,6 +154,11 @@ unsigned long AD9834::SetFreq(FreqReg f_reg, float freq, uint16_t offset=0) {
 	return FreqRegVal;
 }
 
+float AD9834::GetFreq()
+{
+	return ((float)FreqRegVal)*MasterClkFreqStep;
+}
+
 //Sets the waveform 
 void AD9834::Mode(Waveform value)
 {
@@ -262,9 +267,9 @@ void AD9834::SetPhase(PhaseReg preg, unsigned int phase) {
 	}
 }
 
-unsigned int AD9834::GetPhase()
+float AD9834::GetPhase()
 {
-
+	return PhaseRegVal*360.0;
 }
 
 

@@ -81,10 +81,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AD9834.h" />
+    <ClInclude Include="SerialFuncInterface.h" />
     <ClInclude Include="__vm\.AD9832_Driver.vsarduino.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AD9834.cpp" />
+    <ClCompile Include="SerialFuncInterface.cpp" />
   </ItemGroup>
   <PropertyGroup>
     <DebuggerFlavor>VisualMicroDebugger</DebuggerFlavor>
