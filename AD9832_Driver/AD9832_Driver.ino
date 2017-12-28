@@ -2,7 +2,7 @@
 #include <SPI.h>
 #include "AD9834.h"
 
-AD9834 FuncGen = AD9834(40000000, 11);
+AD9834 FuncGen = AD9834(40000000.0, 11);
 
 void setup()
 {

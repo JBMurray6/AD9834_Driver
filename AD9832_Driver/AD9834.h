@@ -78,16 +78,16 @@ public:
 	void Reset(bool value);
 	void Sleep(bool value);
 
-	unsigned long SetFreq(FreqReg f_reg, float freq, uint16_t offset=0);
+	unsigned long SetFreq(FreqReg f_reg, float freq, uint16_t offset);
 	float GetFreq();
 
 
 	void Mode(Waveform value);
 	AD9834(float master_freq, int cspin,
-		int phaseselpint = -1,
-		int fselpin = -1,
-		int resetpin = -1,
-		int sleeppin = -1);
+		int phaseselpint,
+		int fselpin,
+		int resetpin,
+		int sleeppin );
 
 	void SetPhase(PhaseReg preg, unsigned int phase);
 	float GetPhase();

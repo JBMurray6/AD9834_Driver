@@ -133,7 +133,7 @@ void AD9834::WaveOutput_ON() {
 
 // Sets FREG0 to the value required to produce a specified frequency, in Hz.
 unsigned long AD9834::SetFreq(FreqReg f_reg, float freq, uint16_t offset=0) {
-	unsigned int data;
+	
 
 	uint16_t f_LSB;
 	uint16_t  f_MSB;

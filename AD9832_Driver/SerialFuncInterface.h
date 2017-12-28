@@ -13,8 +13,7 @@ struct NameFuncCombo
 {
 	String Identifier;
 	String(*Func)(String *);
-	String(*GetFunc)(String *);
-	
+	String(*GetFunc)(String *);	
 };
 
 typedef struct NameFuncCombo NameFuncCombo;
