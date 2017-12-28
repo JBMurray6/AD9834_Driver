@@ -13,6 +13,8 @@ struct NameFuncCombo
 {
 	String Identifier;
 	String(*Func)(String *);
+	String(*GetFunc)(String *);
+	
 };
 
 typedef struct NameFuncCombo NameFuncCombo;
@@ -28,21 +30,27 @@ class SerialFuncInterfaceClass
 	 String ID = "20171227_JBM";
 
 	 const String IDPrefix = "ID";
+	 const String ErrorPrefix = "Error";
 
 	 unsigned int MAX_NUM_FUNC = 16;
 	 unsigned int CurrentLen = 0;
 	 NameFuncCombo * FuncList;
 
+	 unsigned int Baud = 115200;
+	 unsigned int Timeout = 5;
+
 
 
  public:
-	 SerialFuncInterfaceClass();
-	 SerialFuncInterfaceClass(unsigned int maxfuncnum);
-	 SerialFuncInterfaceClass(unsigned int maxfuncnum, String id);
+	SerialFuncInterfaceClass();
+	SerialFuncInterfaceClass(unsigned int maxfuncnum);
+	SerialFuncInterfaceClass(unsigned int maxfuncnum, String id);
+
+	void SetBaud(unsigned int baud);
 
 	bool AddFunc(NameFuncCombo nfc);
 	bool AddFunc(NameFuncCombo nfc[],unsigned int length);
-	String ParseSerial();
+	bool ParseSerial();
 
 	String IDFunc(String * val);
 };
