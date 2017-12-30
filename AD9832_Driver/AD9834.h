@@ -69,6 +69,7 @@ public:
 	};
 
 	// Function Definitions
+	void Init();
 	void Use_Pins(int value);
 	void Sign_Bit_On(bool value);
 	void Comparator_On(bool value);
@@ -111,7 +112,7 @@ private:
 	uint32_t FreqRegVal = 0;
 	uint16_t PhaseRegVal = 0;
 
-	const SPISettings settings = SPISettings(16000000, LSBFIRST, SPI_MODE2);
+	const SPISettings settings = SPISettings(1000000, LSBFIRST, SPI_MODE2);
 
 	void WaveOutput_ON();
 	void Triangle_Output(int value);

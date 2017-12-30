@@ -4,23 +4,24 @@
 #include "SerialFuncInterface.h"
 
 String SerialFuncInterfaceClass::ID = "20171227_JBM";
+
 SerialFuncInterfaceClass::SerialFuncInterfaceClass()
 {
 	FuncList = new NameFuncCombo[MAX_NUM_FUNC];
-	NameFuncCombo IDlink = { ID, IDFunc, IDFunc };
+	NameFuncCombo IDlink = { IDPrefix, IDFunc, IDFunc };
 	FuncList[0] = IDlink;
 	CurrentLen++;
 
 	Serial.begin(Baud);//baud is always 2M on teensy
 	Serial.setTimeout(Timeout);
-	Serial.println("test");
+
 }
 
 SerialFuncInterfaceClass::SerialFuncInterfaceClass(unsigned int maxfuncnum)
 {
 	MAX_NUM_FUNC = maxfuncnum;
 	FuncList = new NameFuncCombo[MAX_NUM_FUNC];
-	NameFuncCombo IDlink = { ID, this->IDFunc, this->IDFunc };
+	NameFuncCombo IDlink = { IDPrefix, this->IDFunc, this->IDFunc };
 	FuncList[0] = IDlink;
 	CurrentLen++;
 
@@ -33,7 +34,7 @@ SerialFuncInterfaceClass::SerialFuncInterfaceClass(unsigned int maxfuncnum, Stri
 	MAX_NUM_FUNC = maxfuncnum;
 	ID = id;
 	FuncList = new NameFuncCombo[MAX_NUM_FUNC];
-	NameFuncCombo IDlink = { ID, this->IDFunc, this->IDFunc };
+	NameFuncCombo IDlink = { IDPrefix, this->IDFunc, this->IDFunc };
 	FuncList[0] = IDlink;
 	CurrentLen++;
 
@@ -87,32 +88,30 @@ bool SerialFuncInterfaceClass::ParseSerial()
 	String InMessage = Serial.readString();
 
 	int FirstPos = InMessage.indexOf(Terminator);
+	//Serial.println("asdf  " + InMessage);
 	if (FirstPos == -1) //Check to see if it is a message at all
 	{
-		Serial.println("test");
 		return false;
 	}
-	//Serial.println(String(millis()-t));
 	while (!done)
 	{
-		Serial.println("test");
 		String TempStr = InMessage.substring(0, FirstPos);
 		bool found = false;
 		for (unsigned int i = 0; i < CurrentLen; i++)
 		{
+			
 			if (TempStr.startsWith(FuncList[i].Identifier))
-			{
-				
+			{	
 				found = true;
 				TempStr.remove(0, FuncList[i].Identifier.length());
 				TempStr.trim();
 				if (TempStr.indexOf(RequestChar) != -1) //contains '?'
 				{
-					FuncList->GetFunc(&TempStr);
+					Serial.println(FuncList[i].GetFunc(&TempStr));
 				}
 				else
 				{
-					FuncList->Func(&TempStr);
+					Serial.println(FuncList[i].Func(&TempStr));
 				}
 				break;
 			}

@@ -12,7 +12,7 @@
 
 struct NameFuncCombo
 {
-	String Identifier;
+	String Identifier;	
 	String(*Func)(String *);
 	String(*GetFunc)(String *);	
 };
@@ -53,6 +53,7 @@ class SerialFuncInterfaceClass
 	bool ParseSerial();
 
 	static String IDFunc(String * val);
+
 };
 
 

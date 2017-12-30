@@ -28,6 +28,68 @@ extern "C" {
 
 
 
+/* Initialises the AD9834, clearing all the registers, and putting it into sleep mode.
+master_freq is the clock used to drive the AD9834 (not the SPI clock). This is needed
+to properly set the freq
+Leaving pins set to -1 forces system to use SPI version of the function (i.e.
+use RESET command rather than RESET pin)*/
+AD9834::AD9834(float master_freq, int cspin,
+	int phaseselpint,
+	int fselpin,
+	int resetpin,
+	int sleeppin) {
+
+	MasterClkFreq = master_freq;
+	MasterClkFreqStep = MasterClkFreq / ((float)0xFFFFFFF);//7 F's for 28 bits
+
+	CSPin = cspin;
+	pinMode(CSPin, OUTPUT);
+	digitalWrite(CSPin, HIGH); // Set FSYNC high - this goes low when writing to the registers.
+
+
+	FreqSelPin = fselpin;
+	if (FreqSelPin != -1)
+	{
+		pinMode(FreqSelPin, OUTPUT);
+		digitalWrite(FreqSelPin, LOW); // Use FREG0 by default.
+	}
+
+	PhaseSelPin = phaseselpint;
+	if (PhaseSelPin != -1)
+	{
+		pinMode(PhaseSelPin, OUTPUT);
+		digitalWrite(PhaseSelPin, LOW); // Use FREG0 by default.
+	}
+
+	ResetPin = resetpin;
+	if (ResetPin != -1)
+	{
+		pinMode(ResetPin, OUTPUT);
+		digitalWrite(ResetPin, LOW); // Use FREG0 by default.
+	}
+
+	SleepPin = sleeppin;
+	if (SleepPin != -1)
+	{
+		pinMode(SleepPin, OUTPUT);
+		digitalWrite(SleepPin, LOW); // Use FREG0 by default.
+	}
+
+
+}
+
+void AD9834::Init()
+{
+	SPI.begin();
+
+
+	// Set everything to off, basically.
+	SendWord(CONTROL);
+	// Null the phase Registers.
+	SendWord(0xC000); // Phase register 0
+	SendWord(0xE000); // Phase register 1
+}
+
 //Master swtiches for pin vs software control of phase, freq, reset, and sleep functions
 void AD9834::Use_Pins(int value) {
 	if (value) {
@@ -178,64 +240,6 @@ void AD9834::Mode(Waveform value)
 }
 
 
-/* Initialises the AD9834, clearing all the registers, and putting it into sleep mode. 
-	master_freq is the clock used to drive the AD9834 (not the SPI clock). This is needed 
-	to properly set the freq
-	Leaving pins set to -1 forces system to use SPI version of the function (i.e. 
-	use RESET command rather than RESET pin)*/
-AD9834::AD9834(float master_freq, int cspin,
-	int phaseselpint,
-	int fselpin,
-	int resetpin,
-	int sleeppin) {
-
-	MasterClkFreq = master_freq;
-	MasterClkFreqStep = MasterClkFreq / ((float)0xFFFFFFF);//7 F's for 28 bits
-
-	CSPin = cspin;
-	pinMode(CSPin, OUTPUT);
-	digitalWrite(CSPin, HIGH); // Set FSYNC high - this goes low when writing to the registers.
-
-
-	FreqSelPin = fselpin;
-	if (FreqSelPin != -1)
-	{
-		pinMode(FreqSelPin, OUTPUT);
-		digitalWrite(FreqSelPin, LOW); // Use FREG0 by default.
-	}
-	
-	PhaseSelPin = phaseselpint;
-	if (PhaseSelPin != -1)
-	{
-		pinMode(PhaseSelPin, OUTPUT);
-		digitalWrite(PhaseSelPin, LOW); // Use FREG0 by default.
-	}
-
-	ResetPin = resetpin;
-	if (ResetPin != -1)
-	{
-		pinMode(ResetPin, OUTPUT);
-		digitalWrite(ResetPin, LOW); // Use FREG0 by default.
-	}
-
-	SleepPin = sleeppin;
-	if (SleepPin != -1)
-	{
-		pinMode(SleepPin, OUTPUT);
-		digitalWrite(SleepPin, LOW); // Use FREG0 by default.
-	}
-
-
-	SPI.beginTransaction(settings);
-	// Set everything to off, basically.
-	SendWord(CONTROL);
-
-	// Null the phase Registers.
-	SendWord(0xC000); // Phase register 0
-	SendWord(0xE000); // Phase register 1
-
-}
-
 
 
 // Send a 16-bit data word to the AD9834, MSB first.
@@ -243,10 +247,12 @@ AD9834::AD9834(float master_freq, int cspin,
 // the FSEL pin is hardcoded to Port B pin 7. 
 // To use this on any other PCB, this function will have to be modified.
 void AD9834::SendWord(uint16_t data) {
-	PORTB &= ~_BV(7);
+	SPI.beginTransaction(settings);
+	digitalWrite(CSPin, LOW);
 	SPI.transfer((data >> 8) & 0xFF);
 	SPI.transfer(data & 0xFF);
-	PORTB |= _BV(7);
+	digitalWrite(CSPin, HIGH);
+	SPI.endTransaction();
 }
 
 // Set the phase of a register, in degrees (0-359). 
