@@ -9,7 +9,6 @@
 	#include "WProgram.h"
 #endif
 
-#define alsotesting
 
 struct NameFuncCombo
 {
@@ -28,7 +27,7 @@ class SerialFuncInterfaceClass
 	 const char Delimiter = ',';
 
 	 const String ConnectString = "Hi computer!\n";
-	 String ID = "20171227_JBM";
+	 static String ID ;
 
 	 const String IDPrefix = "ID";
 	 const String ErrorPrefix = "Error";
@@ -53,7 +52,7 @@ class SerialFuncInterfaceClass
 	bool AddFunc(NameFuncCombo nfc[],unsigned int length);
 	bool ParseSerial();
 
-	String IDFunc(String * val);
+	static String IDFunc(String * val);
 };
 
 

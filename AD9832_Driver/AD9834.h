@@ -84,10 +84,10 @@ public:
 
 	void Mode(Waveform value);
 	AD9834(float master_freq, int cspin,
-		int phaseselpint,
-		int fselpin,
-		int resetpin,
-		int sleeppin );
+		int phaseselpint = -1,
+		int fselpin = -1,
+		int resetpin = -1,
+		int sleeppin = -1);
 
 	void SetPhase(PhaseReg preg, unsigned int phase);
 	float GetPhase();

@@ -184,10 +184,10 @@ void AD9834::Mode(Waveform value)
 	Leaving pins set to -1 forces system to use SPI version of the function (i.e. 
 	use RESET command rather than RESET pin)*/
 AD9834::AD9834(float master_freq, int cspin,
-	int phaseselpint=-1, 
-	int fselpin=-1,
-	int resetpin=-1,
-	int sleeppin=-1) {
+	int phaseselpint,
+	int fselpin,
+	int resetpin,
+	int sleeppin) {
 
 	MasterClkFreq = master_freq;
 	MasterClkFreqStep = MasterClkFreq / ((float)0xFFFFFFF);//7 F's for 28 bits

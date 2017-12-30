@@ -1,18 +1,19 @@
 // 
 // 
 // 
-#define testinh
 #include "SerialFuncInterface.h"
 
+String SerialFuncInterfaceClass::ID = "20171227_JBM";
 SerialFuncInterfaceClass::SerialFuncInterfaceClass()
 {
 	FuncList = new NameFuncCombo[MAX_NUM_FUNC];
-	NameFuncCombo IDlink = { ID, this->IDFunc, this->IDFunc };
+	NameFuncCombo IDlink = { ID, IDFunc, IDFunc };
 	FuncList[0] = IDlink;
 	CurrentLen++;
 
 	Serial.begin(Baud);//baud is always 2M on teensy
 	Serial.setTimeout(Timeout);
+	Serial.println("test");
 }
 
 SerialFuncInterfaceClass::SerialFuncInterfaceClass(unsigned int maxfuncnum)
@@ -48,7 +49,7 @@ void SerialFuncInterfaceClass::SetBaud(unsigned int baud)
 
 String SerialFuncInterfaceClass::IDFunc(String * val)
 {
-	Serial.println(this->ID);
+	Serial.println(ID);
 	return "";
 }
 
@@ -68,7 +69,7 @@ bool SerialFuncInterfaceClass::AddFunc(NameFuncCombo nfc)
 
 bool SerialFuncInterfaceClass::AddFunc(NameFuncCombo nfc[], unsigned int length)
 {
-	for (int i = 0; i < length; i++)
+	for (unsigned int i = 0; i < length; i++)
 	{
 		if (!AddFunc(nfc[i]))
 		{
@@ -88,17 +89,20 @@ bool SerialFuncInterfaceClass::ParseSerial()
 	int FirstPos = InMessage.indexOf(Terminator);
 	if (FirstPos == -1) //Check to see if it is a message at all
 	{
+		Serial.println("test");
 		return false;
 	}
 	//Serial.println(String(millis()-t));
 	while (!done)
 	{
+		Serial.println("test");
 		String TempStr = InMessage.substring(0, FirstPos);
 		bool found = false;
-		for (int i = 0; i < CurrentLen; i++)
+		for (unsigned int i = 0; i < CurrentLen; i++)
 		{
 			if (TempStr.startsWith(FuncList[i].Identifier))
 			{
+				
 				found = true;
 				TempStr.remove(0, FuncList[i].Identifier.length());
 				TempStr.trim();
