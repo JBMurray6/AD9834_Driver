@@ -1,7 +1,7 @@
 // 
 // 
 // 
-
+#define testinh
 #include "SerialFuncInterface.h"
 
 SerialFuncInterfaceClass::SerialFuncInterfaceClass()

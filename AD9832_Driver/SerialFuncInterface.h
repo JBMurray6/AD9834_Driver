@@ -9,6 +9,8 @@
 	#include "WProgram.h"
 #endif
 
+#define alsotesting
+
 struct NameFuncCombo
 {
 	String Identifier;
