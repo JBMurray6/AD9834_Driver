@@ -1,6 +1,10 @@
-#include "SerialFuncInterface.h"
+#include "stdlib.h"
 #include <SPI.h>
 #include "AD9834.h"
+#include "SerialFuncInterface.h"
+
+
+
 
 #define FUNCNAME(x) x
 #define GETFUNC(x,y) String FUNCNAME(x)(String * input){return String(y);}
@@ -8,7 +12,7 @@
 y=((String)(*input)).toInt();\
 return String(y);}
 
-AD9834 FuncGen = AD9834(40000000.0, 11);
+AD9834 FuncGen = AD9834(48000000.0, 10);
 
 SerialFuncInterfaceClass SerialFuncInterface = SerialFuncInterfaceClass(5);
 
@@ -17,11 +21,18 @@ String aname = "Aname";
 GETFUNC(GETA, a)
 SET_INT_FUNC(SETA, a)
 
-float b = 11;
-String bname = "Freq";
-GETFUNC(bnamef, b)
 
-NameFuncCombo ANFC = { aname,FUNCNAME(SETA),FUNCNAME(GETA) };
+const String FreqPrefix = "Freq";
+String GetFreq(String * S);
+String SetFreq(String * S);
+
+const String ModePrefix = "Mode";
+String GetMode(String * S);
+String SetMode(String * S);
+const String SineModeStr = "Sine";
+const String TriangleModeStr = "Triangle";
+
+
 
 
 void setup()
@@ -33,10 +44,14 @@ void setup()
 	FuncGen.Init();
 	
 
-	NameFuncCombo BNFC = { bname,SetFreq,GetFreq };
+	NameFuncCombo FreqFuncs = { FreqPrefix,SetFreq,GetFreq };
+	NameFuncCombo ModeFuncs = { ModePrefix,SetMode,GetMode};
 
-	SerialFuncInterface.AddFunc(ANFC);
-	SerialFuncInterface.AddFunc(BNFC);
+	SerialFuncInterface.AddFunc(ModeFuncs);
+	SerialFuncInterface.AddFunc(FreqFuncs);
+	FuncGen.SetFreq(AD9834::FreqReg::FREQ0, 1000, 0);
+	FuncGen.SelectFREG(AD9834::FreqReg::FREQ0);
+	FuncGen.SetMode(AD9834::SINUSOIDAL_WAVEFORM);
 }
 
 void loop()
@@ -59,7 +74,46 @@ String SetFreq(String * S)
 {	
 	float F = S->toFloat();
 	FuncGen.SetFreq(AD9834::FreqReg::FREQ0, F,0);
-	return "Set to "+*S;
+	return "Set to "+ String(FuncGen.GetFreq());
+}
+
+String GetMode(String *)
+{
+	AD9834::Waveform mode = FuncGen.GetMode();
+	switch (mode)
+	{
+	case (AD9834::TRIANGULAR_WAVEFORM):
+		return TriangleModeStr;
+	case (AD9834::SINUSOIDAL_WAVEFORM):
+		return SineModeStr;
+	default:
+		return "Error impossible setting";
+		break;
+	}
+	return String();
+}
+
+String SetMode(String * S)
+{
+	AD9834::Waveform mode;
+	String modestr;
+	if (S->startsWith(SineModeStr))
+	{
+		mode = AD9834::SINUSOIDAL_WAVEFORM;
+		modestr = SineModeStr;
+	}
+	else if(S->startsWith(TriangleModeStr))
+	{
+		mode = AD9834::TRIANGULAR_WAVEFORM;
+		modestr = TriangleModeStr;
+	}
+	else
+	{
+		return "Not a recognized type";
+	}
+
+	FuncGen.SetMode(mode);
+	return "Set to " + modestr;
 }
 
 //String Afunc(String * input)

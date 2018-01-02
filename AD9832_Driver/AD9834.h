@@ -83,7 +83,9 @@ public:
 	float GetFreq();
 
 
-	void Mode(Waveform value);
+	void SetMode(Waveform value);
+	Waveform GetMode();
+
 	AD9834(float master_freq, int cspin,
 		int phaseselpint = -1,
 		int fselpin = -1,
@@ -94,7 +96,7 @@ public:
 	float GetPhase();
 
 private:
-	int CSPin = 11;
+	int CSPin = 10;
 	int FreqSelPin = -1;
 	int PhaseSelPin = -1;
 	int ResetPin = -1;
@@ -112,7 +114,7 @@ private:
 	uint32_t FreqRegVal = 0;
 	uint16_t PhaseRegVal = 0;
 
-	const SPISettings settings = SPISettings(1000000, LSBFIRST, SPI_MODE2);
+	const SPISettings settings = SPISettings(1000000, MSBFIRST, SPI_MODE2);
 
 	void WaveOutput_ON();
 	void Triangle_Output(int value);

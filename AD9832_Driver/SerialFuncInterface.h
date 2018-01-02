@@ -19,12 +19,33 @@ struct NameFuncCombo
 
 typedef struct NameFuncCombo NameFuncCombo;
 
+union ParameterUnion
+{
+	int ival;
+	float fval;
+};
+
+enum ParameterTypes
+{
+	FloatVar = 0,
+	IntVar = 1
+};
+
+struct TypedParameter
+{
+	ParameterUnion Param;
+	ParameterTypes Type;
+	bool Required;
+};
+
+typedef struct TypedParameter TypedParameter;
+
 class SerialFuncInterfaceClass
 {
  protected:
-	 const char RequestChar = '?';
-	 const char Terminator = ';';
-	 const char Delimiter = ',';
+	 static const char RequestChar = '?';
+	 static const char Terminator = ';';
+	 static const char Delimiter = ',';
 
 	 const String ConnectString = "Hi computer!\n";
 	 static String ID ;
@@ -53,6 +74,8 @@ class SerialFuncInterfaceClass
 	bool ParseSerial();
 
 	static String IDFunc(String * val);
+
+	static bool ParseArguments(TypedParameter * out, int outlen, String * In);
 
 };
 

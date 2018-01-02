@@ -222,21 +222,34 @@ float AD9834::GetFreq()
 }
 
 //Sets the waveform 
-void AD9834::Mode(Waveform value)
+void AD9834::SetMode(Waveform value)
 {
+	WaveOutput_ON();
 	switch (value)
 	{
-	case (Waveform::SINUSOIDAL_WAVEFORM):
+	case (Waveform::TRIANGULAR_WAVEFORM):
 		CONTROL |= MODE;
 		break;
 
-	case (Waveform::TRIANGULAR_WAVEFORM):
+	case (Waveform::SINUSOIDAL_WAVEFORM):
 		CONTROL &= ~MODE;
 		break;
 	default:
 		break;
 	}
 	SendWord(CONTROL);
+}
+
+AD9834::Waveform AD9834::GetMode()
+{
+	if (CONTROL&MODE)
+	{
+		return TRIANGULAR_WAVEFORM;
+	}
+	else
+	{
+		return SINUSOIDAL_WAVEFORM;
+	}
 }
 
 
@@ -248,7 +261,12 @@ void AD9834::Mode(Waveform value)
 // To use this on any other PCB, this function will have to be modified.
 void AD9834::SendWord(uint16_t data) {
 	SPI.beginTransaction(settings);
+
+	
+
 	digitalWrite(CSPin, LOW);
+
+	//delay(1);
 	SPI.transfer((data >> 8) & 0xFF);
 	SPI.transfer(data & 0xFF);
 	digitalWrite(CSPin, HIGH);

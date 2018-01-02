@@ -53,6 +53,44 @@ String SerialFuncInterfaceClass::IDFunc(String * val)
 	Serial.println(ID);
 	return "";
 }
+//todo finish this**********************************************
+bool SerialFuncInterfaceClass::ParseArguments(TypedParameter * out, int outlen, String * In)
+{
+	bool done = false;
+	int FirstPos;
+
+	for(int i=0; i++; i<outlen)
+	{
+		FirstPos = In->indexOf(Delimiter);
+		if (FirstPos == -1) //Check to see if it is a message at all
+		{
+			FirstPos = In->indexOf(Terminator);
+			if (FirstPos == -1) //Check to see if it is a message at all
+			{
+				//TODO stopped here
+				break;
+			}
+		}
+
+		String TempStr = In->substring(0, FirstPos);
+		bool found = false;
+		
+		switch (out[i].Type)
+		{
+		case(FloatVar):
+			out[i].Param.fval = TempStr.toFloat();
+			break;
+		case(IntVar):
+			out[i].Param.fval = TempStr.toFloat();
+			break;
+		default:
+			break;
+		}
+		//Check for multiple messages
+		In->remove(0, FirstPos + 1);
+	}
+	return done;
+}
 
 bool SerialFuncInterfaceClass::AddFunc(NameFuncCombo nfc)
 {
