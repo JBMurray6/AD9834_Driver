@@ -65,9 +65,13 @@ bool SerialFuncInterfaceClass::ParseArguments(TypedParameter * out, int outlen, 
 		if (FirstPos == -1) //Check to see if it is a message at all
 		{
 			FirstPos = In->indexOf(Terminator);
-			if (FirstPos == -1) //Check to see if it is a message at all
+			if (FirstPos == -1) 
 			{
 				//TODO stopped here
+				if (out[i].Required)
+				{
+					return false;
+				}
 				break;
 			}
 		}
@@ -86,7 +90,7 @@ bool SerialFuncInterfaceClass::ParseArguments(TypedParameter * out, int outlen, 
 		default:
 			break;
 		}
-		//Check for multiple messages
+		
 		In->remove(0, FirstPos + 1);
 	}
 	return done;
@@ -126,7 +130,7 @@ bool SerialFuncInterfaceClass::ParseSerial()
 	String InMessage = Serial.readString();
 
 	int FirstPos = InMessage.indexOf(Terminator);
-	//Serial.println("asdf  " + InMessage);
+	
 	if (FirstPos == -1) //Check to see if it is a message at all
 	{
 		return false;
