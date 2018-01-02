@@ -25,14 +25,31 @@ SET_INT_FUNC(SETA, a)
 const String FreqPrefix = "Freq";
 String GetFreq(String * S);
 String SetFreq(String * S);
+NameFuncCombo FreqFuncs = { FreqPrefix,SetFreq,GetFreq };
 
 const String ModePrefix = "Mode";
 String GetMode(String * S);
 String SetMode(String * S);
 const String SineModeStr = "Sine";
 const String TriangleModeStr = "Triangle";
+NameFuncCombo ModeFuncs = { ModePrefix,SetMode,GetMode };
 
-
+const String FreqSweepPrefix = "Sweep";
+String GetFreqSweep(String * S);
+String SetFreqSweep(String * S);
+NameFuncCombo FreqSweepFuncs = { FreqSweepPrefix,SetFreqSweep,GetFreqSweep };
+enum SweepTypes
+{
+	LIN=0,
+	LOG=1
+};
+const TypedParameter FreqSweepParams[] = {
+	{ { (float)0.0 }, FloatVar, true },//Start
+	{ { (float)0.0 }, FloatVar, true },//Stop
+	{ { (int)1000 }, IntVar, false },//Num of milliseconds
+	{ { (int)0 }, IntVar, true }//SweepType enum
+};
+TypedParameter CurrentSweep;
 
 
 void setup()
@@ -44,8 +61,8 @@ void setup()
 	FuncGen.Init();
 	
 
-	NameFuncCombo FreqFuncs = { FreqPrefix,SetFreq,GetFreq };
-	NameFuncCombo ModeFuncs = { ModePrefix,SetMode,GetMode};
+
+
 
 	SerialFuncInterface.AddFunc(ModeFuncs);
 	SerialFuncInterface.AddFunc(FreqFuncs);
@@ -116,7 +133,11 @@ String SetMode(String * S)
 	return "Set to " + modestr;
 }
 
-//String Afunc(String * input)
-//{
-//	return String(a);
-//}
+String SetFreqSweep(String * S)
+{
+	memcpy(&CurrentSweep, &FreqSweepParams, sizeof FreqSweepParams);
+	int num = sizeof(CurrentSweep) / sizeof(TypedParameter);
+	SerialFuncInterface.ParseArguments(&CurrentSweep, num, S);
+
+
+}
