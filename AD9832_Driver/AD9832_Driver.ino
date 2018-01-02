@@ -43,13 +43,15 @@ enum SweepTypes
 	LIN=0,
 	LOG=1
 };
-const TypedParameter FreqSweepParams[] = {
+const int NumSweepParams=4;
+const TypedParameter FreqSweepParams[NumSweepParams] = {
 	{ { (float)0.0 }, FloatVar, true },//Start
 	{ { (float)0.0 }, FloatVar, true },//Stop
 	{ { (int)1000 }, IntVar, false },//Num of milliseconds
 	{ { (int)0 }, IntVar, true }//SweepType enum
 };
-TypedParameter CurrentSweep;
+TypedParameter CurrentSweep[NumSweepParams];
+bool SweepGoing = false;
 
 
 void setup()
@@ -77,6 +79,11 @@ void loop()
   /* add main program code here */
 	SerialFuncInterface.ParseSerial();
 	//Serial.println("test");
+
+	if (SweepGoing)
+	{
+
+	}
 
 
 }
@@ -136,8 +143,12 @@ String SetMode(String * S)
 String SetFreqSweep(String * S)
 {
 	memcpy(&CurrentSweep, &FreqSweepParams, sizeof FreqSweepParams);
-	int num = sizeof(CurrentSweep) / sizeof(TypedParameter);
-	SerialFuncInterface.ParseArguments(&CurrentSweep, num, S);
 
+	SerialFuncInterface.ParseArguments(CurrentSweep, NumSweepParams, S);
+	SweepGoing = true;
+}
 
+String GetFreqSweep(String * S)
+{
+	Serial.println(String(CurrentSweep[0].Param.fval));
 }
