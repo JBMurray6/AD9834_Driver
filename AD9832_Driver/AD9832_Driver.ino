@@ -8,9 +8,7 @@
 
 #define FUNCNAME(x) x
 #define GETFUNC(x,y) String FUNCNAME(x)(String * input){return String(y);}
-#define SET_INT_FUNC(x,y) String FUNCNAME(x)(String * input){\
-y=((String)(*input)).toInt();\
-return String(y);}
+#define SET_INT_FUNC(x,y) String FUNCNAME(x)(String * input){y=((String)(*input)).toInt();return String(y);}
 
 AD9834 FuncGen = AD9834(48000000.0, 10);
 
@@ -44,14 +42,18 @@ enum SweepTypes
 	LOG=1
 };
 const int NumSweepParams=4;
+
+const float initfloat = 0;
 const TypedParameter FreqSweepParams[NumSweepParams] = {
-	{ { (float)0.0 }, FloatVar, true },//Start
-	{ { (float)0.0 }, FloatVar, true },//Stop
-	{ { (int)1000 }, IntVar, false },//Num of milliseconds
-	{ { (int)0 }, IntVar, true }//SweepType enum
+	{ initfloat , FloatVar,  true },//Start
+	{ initfloat , FloatVar, true },//Stop
+	{ (int)1000 , IntVar, false },//Num of milliseconds
+	{  (int)0 , IntVar, true }//SweepType enum
 };
 TypedParameter CurrentSweep[NumSweepParams];
 bool SweepGoing = false;
+uint32_t StartMillisecods=0;
+float SweepRate;
 
 
 void setup()
@@ -68,6 +70,7 @@ void setup()
 
 	SerialFuncInterface.AddFunc(ModeFuncs);
 	SerialFuncInterface.AddFunc(FreqFuncs);
+	SerialFuncInterface.AddFunc(FreqSweepFuncs);
 	FuncGen.SetFreq(AD9834::FreqReg::FREQ0, 1000, 0);
 	FuncGen.SelectFREG(AD9834::FreqReg::FREQ0);
 	FuncGen.SetMode(AD9834::SINUSOIDAL_WAVEFORM);
@@ -82,7 +85,20 @@ void loop()
 
 	if (SweepGoing)
 	{
-
+		long del = millis() - StartMillisecods;
+		CurrentSweep[2].Param.ival = CurrentSweep[2].Param.ival - (del);//time
+		if (CurrentSweep[2].Param.ival < 0)//time
+		{
+			CurrentSweep[0].Param.fval = CurrentSweep[1].Param.fval;//make sure to hit the last val
+			SweepGoing = false;
+		}
+		else
+		{
+			CurrentSweep[0].Param.fval = ((float)del)*(SweepRate);
+		}
+		Serial.println("del: "+String(SweepRate*del)+"f: "+String(CurrentSweep[2].Param.ival));
+		//Serial.println("1234asdf");
+		FuncGen.SetFreq(AD9834::FreqReg::FREQ0, CurrentSweep[0].Param.fval, 0);
 	}
 
 
@@ -144,11 +160,22 @@ String SetFreqSweep(String * S)
 {
 	memcpy(&CurrentSweep, &FreqSweepParams, sizeof FreqSweepParams);
 
-	SerialFuncInterface.ParseArguments(CurrentSweep, NumSweepParams, S);
+	if (!SerialFuncInterface.ParseArguments(CurrentSweep, NumSweepParams, S))
+	{
+		Serial.println("Failed");
+	}
 	SweepGoing = true;
+	StartMillisecods = millis();
+	Serial.println(CurrentSweep[0].Param.fval);
+	Serial.println(CurrentSweep[1].Param.fval);
+	Serial.println(CurrentSweep[2].Param.ival);
+	Serial.println(CurrentSweep[3].Param.ival);
+
+	SweepRate = (CurrentSweep[1].Param.fval - CurrentSweep[0].Param.fval) / ((float)CurrentSweep[2].Param.ival);
+	return "";
 }
 
 String GetFreqSweep(String * S)
 {
-	Serial.println(String(CurrentSweep[0].Param.fval));
+	return String(CurrentSweep[0].Param.fval);
 }
