@@ -1,7 +1,6 @@
 C:\Users\Joe\AppData\Local\Temp\VMBuilds\AD9832_Driver\teensy31\Release\AD9834.cpp.o: \
  C:\Users\Joe\AppData\Local\Temp\VMBuilds\AD9832_Driver\teensy31\Release\AD9834.cpp \
- D:\Program\ Files\ (x86)\Arduino\hardware\teensy\avr\cores\teensy3/Arduino.h \
- D:\Program\ Files\ (x86)\Arduino\hardware\teensy\avr\cores\teensy3/WProgram.h \
+ D:\Program\ Files\ (x86)\Arduino\hardware\teensy\avr\cores\teensy3/wprogram.h \
  D:\Program\ Files\ (x86)\Arduino\hardware\teensy\avr\cores\teensy3/avr/pgmspace.h \
  D:\Program\ Files\ (x86)\Arduino\hardware\teensy\avr\cores\teensy3/avr/interrupt.h \
  D:\Program\ Files\ (x86)\Arduino\hardware\teensy\avr\cores\teensy3/avr_functions.h \
@@ -36,8 +35,10 @@ C:\Users\Joe\AppData\Local\Temp\VMBuilds\AD9832_Driver\teensy31\Release\AD9834.c
  D:\Program\ Files\ (x86)\Arduino\hardware\teensy\avr\cores\teensy3/WCharacter.h \
  D:\Program\ Files\ (x86)\Arduino\hardware\teensy\avr\cores\teensy3/elapsedMillis.h \
  D:\Program\ Files\ (x86)\Arduino\hardware\teensy\avr\cores\teensy3/Arduino.h \
+ D:\Program\ Files\ (x86)\Arduino\hardware\teensy\avr\cores\teensy3/WProgram.h \
  D:\Program\ Files\ (x86)\Arduino\hardware\teensy\avr\cores\teensy3/IntervalTimer.h \
  C:\Users\Joe\AppData\Local\Temp\VMBuilds\AD9832_Driver\teensy31\Release\AD9834.h \
+ D:\Program\ Files\ (x86)\Arduino\hardware\teensy\avr\cores\teensy3/Arduino.h \
  D:\Program\ Files\ (x86)\Arduino\hardware\teensy\avr\libraries\SPI/SPI.h \
  D:\Program\ Files\ (x86)\Arduino\hardware\teensy\avr\cores\teensy3/DMAChannel.h \
  D:\Program\ Files\ (x86)\Arduino\hardware\teensy\avr\cores\teensy3/EventResponder.h

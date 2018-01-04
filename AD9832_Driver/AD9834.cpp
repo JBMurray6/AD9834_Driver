@@ -15,13 +15,13 @@ For a full copy of the GNU General Public License,
 see <http://www.gnu.org/licenses/>.
 */
 
-#if ARDUINO >= 100
-#include "Arduino.h"   
+#if defined(ARDUINO) && ARDUINO >= 100
+#include "wprogram.h"
 #else
-extern "C" {
-#include "WConstants.h"
-}
+#include "WProgram.h"
 #endif
+
+
 #include "AD9834.h"
 #include <SPI.h>
 

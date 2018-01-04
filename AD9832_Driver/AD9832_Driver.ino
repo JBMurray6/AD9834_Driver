@@ -2,6 +2,7 @@
 #include <SPI.h>
 #include "AD9834.h"
 #include "SerialFuncInterface.h"
+#include <arm_math.h>
 
 
 
@@ -38,10 +39,10 @@ String SetFreqSweep(String * S);
 NameFuncCombo FreqSweepFuncs = { FreqSweepPrefix,SetFreqSweep,GetFreqSweep };
 enum SweepTypes
 {
-	LIN=0,
-	LOG=1
+	LIN = 0,
+	LOG = 1
 };
-const int NumSweepParams=4;
+const int NumSweepParams = 4;
 
 const float initfloat = 0;
 const TypedParameter FreqSweepParams[NumSweepParams] = {
@@ -52,18 +53,18 @@ const TypedParameter FreqSweepParams[NumSweepParams] = {
 };
 TypedParameter CurrentSweep[NumSweepParams];
 bool SweepGoing = false;
-uint32_t StartMillisecods=0;
+uint32_t StartMillisecods = 0;
 float SweepRate;
 
 
 void setup()
 {
-	
+
 	//Serial.begin(115200);
 	//Serial.println("test");
   /* add setup code here */
 	FuncGen.Init();
-	
+
 
 
 
@@ -79,26 +80,38 @@ void setup()
 void loop()
 {
 
-  /* add main program code here */
+	/* add main program code here */
 	SerialFuncInterface.ParseSerial();
 	//Serial.println("test");
 
 	if (SweepGoing)
 	{
 		long del = millis() - StartMillisecods;
-		CurrentSweep[2].Param.ival = CurrentSweep[2].Param.ival - (del);//time
-		if (CurrentSweep[2].Param.ival < 0)//time
+		float NewFreq=1000;
+		if (CurrentSweep[2].Param.ival < del)//time
 		{
-			CurrentSweep[0].Param.fval = CurrentSweep[1].Param.fval;//make sure to hit the last val
+			NewFreq = CurrentSweep[1].Param.fval;//make sure to hit the last val
 			SweepGoing = false;
 		}
 		else
 		{
-			CurrentSweep[0].Param.fval = ((float)del)*(SweepRate);
+			//Serial.println(CurrentSweep[3].Param.ival);
+			switch (CurrentSweep[3].Param.ival)
+			{
+			case (SweepTypes::LIN):
+				NewFreq = CurrentSweep[0].Param.fval + ((float)del)*(SweepRate);
+				break;
+			case (SweepTypes::LOG):
+				NewFreq=(float)pow(10.0,((float)del)*(SweepRate)+log10(CurrentSweep[0].Param.fval));
+				break;
+			default:
+				break;
+			}			
 		}
-		Serial.println("del: "+String(SweepRate*del)+"f: "+String(CurrentSweep[2].Param.ival));
+		//Serial.println("del: "+String(del)+" f: "+String(NewFreq,6));
+
 		//Serial.println("1234asdf");
-		FuncGen.SetFreq(AD9834::FreqReg::FREQ0, CurrentSweep[0].Param.fval, 0);
+		FuncGen.SetFreq(AD9834::FreqReg::FREQ0, NewFreq, 0);
 	}
 
 
@@ -111,10 +124,10 @@ String GetFreq(String *)
 }
 
 String SetFreq(String * S)
-{	
+{
 	float F = S->toFloat();
-	FuncGen.SetFreq(AD9834::FreqReg::FREQ0, F,0);
-	return "Set to "+ String(FuncGen.GetFreq());
+	FuncGen.SetFreq(AD9834::FreqReg::FREQ0, F, 0);
+	return "Set to " + String(FuncGen.GetFreq());
 }
 
 String GetMode(String *)
@@ -142,7 +155,7 @@ String SetMode(String * S)
 		mode = AD9834::SINUSOIDAL_WAVEFORM;
 		modestr = SineModeStr;
 	}
-	else if(S->startsWith(TriangleModeStr))
+	else if (S->startsWith(TriangleModeStr))
 	{
 		mode = AD9834::TRIANGULAR_WAVEFORM;
 		modestr = TriangleModeStr;
@@ -164,14 +177,23 @@ String SetFreqSweep(String * S)
 	{
 		Serial.println("Failed");
 	}
-	SweepGoing = true;
-	StartMillisecods = millis();
-	Serial.println(CurrentSweep[0].Param.fval);
-	Serial.println(CurrentSweep[1].Param.fval);
-	Serial.println(CurrentSweep[2].Param.ival);
-	Serial.println(CurrentSweep[3].Param.ival);
 
-	SweepRate = (CurrentSweep[1].Param.fval - CurrentSweep[0].Param.fval) / ((float)CurrentSweep[2].Param.ival);
+	StartMillisecods = millis();
+	switch (CurrentSweep[3].Param.ival)
+	{
+	case (SweepTypes::LIN):
+		SweepRate = (CurrentSweep[1].Param.fval - CurrentSweep[0].Param.fval) / ((float)CurrentSweep[2].Param.ival);//delta freq/time
+		break;
+	case (SweepTypes::LOG):
+		SweepRate = ((float)(log10(CurrentSweep[1].Param.fval) - log10(CurrentSweep[0].Param.fval))) /((float)CurrentSweep[2].Param.ival);//delta freq/time
+		Serial.println(String((log10(CurrentSweep[1].Param.fval)-log10(CurrentSweep[0].Param.fval))/((float)CurrentSweep[2].Param.ival),10));
+		//Serial.println(String((float)CurrentSweep[2].Param.ival));
+		break;
+	default:
+		return "Not a sweep type";
+	}
+
+	SweepGoing = true;
 	return "";
 }
 

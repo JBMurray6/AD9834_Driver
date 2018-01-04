@@ -42,4 +42,7 @@ C:\Users\Joe\AppData\Local\Temp\VMBuilds\AD9832_Driver\teensy31\Release\AD9832_D
  D:\Program\ Files\ (x86)\Arduino\hardware\teensy\avr\cores\teensy3/DMAChannel.h \
  D:\Program\ Files\ (x86)\Arduino\hardware\teensy\avr\cores\teensy3/EventResponder.h \
  C:\Users\Joe\AppData\Local\Temp\VMBuilds\AD9832_Driver\teensy31\Release\AD9834.h \
- C:\Users\Joe\AppData\Local\Temp\VMBuilds\AD9832_Driver\teensy31\Release\SerialFuncInterface.h
+ C:\Users\Joe\AppData\Local\Temp\VMBuilds\AD9832_Driver\teensy31\Release\SerialFuncInterface.h \
+ D:\Program\ Files\ (x86)\Arduino\hardware\teensy\avr\cores\teensy3/arm_math.h \
+ D:\Program\ Files\ (x86)\Arduino\hardware\teensy\avr\cores\teensy3/core_cmInstr.h \
+ D:\Program\ Files\ (x86)\Arduino\hardware\teensy\avr\cores\teensy3/core_cm4_simd.h
