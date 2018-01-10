@@ -43,4 +43,7 @@ C:\Users\Joe\AppData\Local\Temp\VMBuilds\AD9832_Driver\teensy31\Debug\AD9832_Dri
  D:\Program\ Files\ (x86)\Arduino\hardware\teensy\avr\cores\teensy3/EventResponder.h \
  C:\Users\Joe\AppData\Local\Temp\VMBuilds\AD9832_Driver\teensy31\Debug\AD9834.h \
  C:\Users\Joe\AppData\Local\Temp\VMBuilds\AD9832_Driver\teensy31\Debug\SerialFuncInterface.h \
+ D:\Program\ Files\ (x86)\Arduino\hardware\teensy\avr\cores\teensy3/arm_math.h \
+ D:\Program\ Files\ (x86)\Arduino\hardware\teensy\avr\cores\teensy3/core_cmInstr.h \
+ D:\Program\ Files\ (x86)\Arduino\hardware\teensy\avr\cores\teensy3/core_cm4_simd.h \
  C:\Program\ Files\ (x86)\Microsoft\ Visual\ Studio\2017\Community\Common7\IDE\Extensions\pbd1usl1.2ll\Micro\ Platforms\default\debuggers\VM_DBG/VM_DBG.h

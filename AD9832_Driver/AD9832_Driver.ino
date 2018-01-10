@@ -1,4 +1,4 @@
-#include "stdlib.h"
+//#include "stdlib.h"
 #include <SPI.h>
 #include "AD9834.h"
 #include "SerialFuncInterface.h"
@@ -33,6 +33,15 @@ const String SineModeStr = "Sine";
 const String TriangleModeStr = "Triangle";
 NameFuncCombo ModeFuncs = { ModePrefix,SetMode,GetMode };
 
+const String AmplitudePrefix = "Amp";
+String GetAmplitude(String * S);
+String SetAmplitude(String * S);
+NameFuncCombo AmplitudeFuncs = { AmplitudePrefix,SetAmplitude,GetAmplitude };
+float Amplitude = 1;
+const unsigned int DACPin = A14;
+const unsigned int Resolution = 12;
+const float MaxDACInt = (float)((1 << 12) - 1);
+
 const String FreqSweepPrefix = "Sweep";
 String GetFreqSweep(String * S);
 String SetFreqSweep(String * S);
@@ -43,7 +52,6 @@ enum SweepTypes
 	LOG = 1
 };
 const int NumSweepParams = 4;
-
 const float initfloat = 0;
 const TypedParameter FreqSweepParams[NumSweepParams] = {
 	{ initfloat , FloatVar,  true },//Start
@@ -59,19 +67,17 @@ float SweepRate;
 
 void setup()
 {
-
+	analogWriteResolution(12);
+	pinMode(DACPin, OUTPUT);
 	//Serial.begin(115200);
 	//Serial.println("test");
   /* add setup code here */
 	FuncGen.Init();
 
-
-
-
-
 	SerialFuncInterface.AddFunc(ModeFuncs);
 	SerialFuncInterface.AddFunc(FreqFuncs);
 	SerialFuncInterface.AddFunc(FreqSweepFuncs);
+	SerialFuncInterface.AddFunc(AmplitudeFuncs);
 	FuncGen.SetFreq(AD9834::FreqReg::FREQ0, 1000, 0);
 	FuncGen.SelectFREG(AD9834::FreqReg::FREQ0);
 	FuncGen.SetMode(AD9834::SINUSOIDAL_WAVEFORM);
@@ -129,6 +135,9 @@ String SetFreq(String * S)
 	FuncGen.SetFreq(AD9834::FreqReg::FREQ0, F, 0);
 	return "Set to " + String(FuncGen.GetFreq());
 }
+
+String GetAmplitude(String * S);
+String SetAmplitude(String * S);
 
 String GetMode(String *)
 {
@@ -201,3 +210,24 @@ String GetFreqSweep(String * S)
 {
 	return String(CurrentSweep[0].Param.fval);
 }
+
+String GetAmplitude(String *)
+{
+	return String(Amplitude);
+}
+
+String SetAmplitude(String * S)
+{
+	Amplitude = S->toFloat();
+	if (Amplitude > 1)
+	{
+		Amplitude = 1;
+	}
+	else if (Amplitude < 0)
+	{
+		Amplitude = 0;
+	}
+	analogWrite(DACPin, (int)((1-Amplitude)*MaxDACInt));
+	return "Set to " + String(Amplitude);
+}
+
